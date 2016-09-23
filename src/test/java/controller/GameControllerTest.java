@@ -1,10 +1,10 @@
 package controller;
 
 import data.Game;
-import data.Mark;
-import static data.Mark.X;
-import static data.Mark.O;
-import static data.Mark._;
+import data.Player;
+import static data.Player.X;
+import static data.Player.O;
+import static data.Player._;
 import junit.framework.TestCase;
 
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class GameControllerTest extends TestCase {
     
     @Test
     public void testHorizontalWin() {
-        Mark[][] board = {
+        Player[][] board = {
             {O,O,O},
             {X,O,_},
             {X,_,X}        
@@ -40,7 +40,7 @@ public class GameControllerTest extends TestCase {
     
     @Test
     public void testVerticalWin() {
-        Mark[][] board = {
+        Player[][] board = {
             {X,O,O},
             {X,O,_},
             {X,_,X}        
@@ -57,7 +57,7 @@ public class GameControllerTest extends TestCase {
     
     @Test
     public void testBiDiagonalWin() {
-        Mark[][] board = {
+        Player[][] board = {
             {O,X,O,X,_},
             {X,O,_,X,_},
             {_,_,X,_,_},        
@@ -77,7 +77,7 @@ public class GameControllerTest extends TestCase {
     
     @Test
     public void testMainDiagonalWin() {
-        Mark[][] board = {
+        Player[][] board = {
             {O,_,O,X,_},
             {X,O,_,X,_},
             {_,_,O,_,_},        

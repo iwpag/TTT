@@ -1,14 +1,20 @@
 package controller;
 
 import data.Game;
-import data.Mark;
+import data.Player;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import services.GameService;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.Response;
+
 
 /**
  * @author nilstes
@@ -16,73 +22,73 @@ import services.GameService;
 public class GameController {
 
     private static final Logger log = Logger.getLogger(GameController.class.getName());
-
-    private static Random rnd = new SecureRandom();
+    private static Random rnd = new SecureRandom();  
+    private static Map<String, Game> games = new HashMap<String, Game>();
     
-    static Map<String, Game> games = new HashMap<String, Game>();
+    private GameAI ai = new GameAI();
     
     public Game createGame(String inviter, String invitee, int squares) {
         String gameId = new BigInteger(128, rnd).toString(36);
         Game game = new Game(gameId, inviter, invitee, squares);
-        games.put(gameId, game);
-        
         game.setTurn(rnd.nextBoolean() ? inviter : invitee);
-        if(game.getTurn().equals("")) { // "" means robot
-            makeRobotMove(game);
+        games.put(gameId, game);
+            
+        // Robot game?
+        if(game.getTurn().equals("")) {
+            game.setInviteAccepted(true);
+            ai.move(game);
         }
         return game;
     }
         
-    public Game move(String player, String gameId, int x, int y) {
-        Game game = games.get(gameId);
-        if(game == null) {
-            log.warning("Game not found");
-            return null;
-        }
-
+    public Game move(String gameId, String player, int x, int y) {
+        Game game = getGame(gameId);
+        
         // Right turn?
         if(!player.equals(game.getTurn())) {
             log.warning("Wrong turn");
-            return null; // kast
+            throw new ClientErrorException("Ikke denne spillerens tur", Response.Status.BAD_REQUEST);
         }
         
-        // Out of range
+        // Out of range?
         if(x < 0 || y < 0 || x >= game.getSquares() || y >= game.getSquares()) {
-            log.warning("Position out of range");
-            return null; // kast
+            log.log(Level.WARNING, "Position out of range: {0},{1}", new Object[]{x, y});
+            throw new ClientErrorException("Posisjon er ugyldig: " + x + "," + y, Response.Status.BAD_REQUEST);
         }
         
         // Empty square?
-        if(game.getBoard()[y][x] != Mark._) {
-            log.warning("Square not empty");
-            return null; // kast
+        if(game.getBoard()[y][x] != Player._) {
+            log.log(Level.WARNING, "Square not empty: {0},{1}", new Object[]{x, y});
+            throw new ClientErrorException("Rute ikke tom: " + x + "," + y, Response.Status.BAD_REQUEST);
         }
         
         // Make move
         game.addMove(x, y, player);
         
         // Robot move?
-        if(game.getWinner() == null && game.getNumMoves() < game.getSquares()*game.getSquares()) {
-            if(game.getTurn().equals("")) {
-                makeRobotMove(game);
-            }
+        if(game.getWinner() == null && game.getNumMoves() < game.getSquares()*game.getSquares() && game.getTurn().equals("")) {
+            ai.move(game);
         }
         
         return game;
     }
 
-    private void makeRobotMove(Game game) {
-        for(int i=0; i<game.getSquares(); i++) {
-            for(int j=0; j<game.getSquares(); j++) {
-                if(game.getBoard()[j][i] == Mark._) {
-                    game.addMove(i, j, "");
-                    return;
-                }
-            }            
+    public Game getGame(String gameId) {
+        Game game = games.get(gameId);
+        if(game == null) {
+            log.warning("Game not found");
+            throw new NotFoundException("Spill med id " + gameId + " ble ikke funnet");
         }
+        return game;
     }
 
-    public Game getGame(String gameId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<Game> getInvites(String userName) {
+        List<Game> invites = new ArrayList<Game>();
+        for(Game game : games.values()) {
+            if(userName.equals(game.getInvitee()) && !game.isInviteAccepted()) {
+                invites.add(game);
+            }
+        }
+        return invites;
     }
 }

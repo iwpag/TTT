@@ -1,6 +1,7 @@
 package repo;
 
 import data.Session;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,5 +22,9 @@ public class SessionRepository {
     
     public boolean existsSession(String userName) {
         return sessions.containsKey(userName);
+    }
+    
+    public Collection<String> getAllUserNames() {
+        return sessions.keySet();
     }
 }

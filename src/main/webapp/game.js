@@ -1,4 +1,5 @@
-var game;
+var game = null;
+var myInvite = null;
 var lineColor = "#e0e0e0";
 var xColor = "#2020ff";
 var oColor = "#ffff20";
@@ -103,6 +104,18 @@ function drawBoard(context) {
     }
 }
 
+function displayGameInfo() {
+    if(game != null) {
+        $("#xPlayer").html(game.inviter);
+        $("#oPlayer").html(game.invitee === "" ? "robot" : game.invitee);
+        $("#turn").html(game.turn);
+    } else {
+        $("#xPlayer").html("");
+        $("#oPlayer").html("");
+        $("#turn").html("");
+    }
+}
+
 $(document).ready(function() {
                         
     getLoggedOnUser(function(data) {
@@ -116,29 +129,74 @@ $(document).ready(function() {
 
         drawBoardLines(context);
 
-        $("#board").click(function(event) {
-            var pos = getBoardPosition(canvas, event);
-            
-            // todo draw wheel
-            
+        $("#newPlayerInvite").click(function() {
             $.ajax({
-                url: 'webresources/games/' + game.gameId + "/moves",
-                type: 'POST',
+                url: 'webresources/opponents',
+                type: 'GET',
                 dataType: 'json',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify({column: pos.x, row: pos.y}),
                 success: function(data) {        
-                    // alert(JSON.stringify(data));
-                    game = data;
-                    drawBoard(context);
-                    if(data.winner != null) {
-                        bootbox.alert("Vinneren er " + data.winner + "!");
+                    // Set select options
+                    if(data.userNames.length === 0) {
+                        bootbox.alert("Det er ingen andre pålogget akkurat nå");
+                    } else {
+                        $('#player').html(""); // Clear
+                        $.each(data.userNames, function(index, value) {   
+                            $('#player').append($("<option></option>").attr("value", value).text(value)); 
+                        });
+                        
+                        // Set modal visible
+                        $('#newPlayerInviteModal').modal('show');
                     }
                 },
                 error: function (xhr, status, error) {
                     handleError(xhr, status, error);
                 }
             }); 
+        });
+
+        $("#newInviteSubmit").click(function() {
+            alert($("#player").val());
+            $.ajax({
+                url: 'webresources/games/',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'text/plain; charset=utf-8',
+                data: $("#player").val(),
+                success: function(data) {        
+                    alert(JSON.stringify(data));
+                    myInvite = data;
+                },
+                error: function (xhr, status, error) {
+                    handleError(xhr, status, error);
+                }
+            }); 
+        });
+
+        $("#board").click(function(event) {
+            if(game != null) {
+                var pos = getBoardPosition(canvas, event);
+
+                $.ajax({
+                    url: 'webresources/games/' + game.gameId + "/moves",
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({column: pos.x, row: pos.y}),
+                    success: function(data) {        
+                        // alert(JSON.stringify(data));
+                        game = data;
+                        drawBoard(context);
+                        if(game.winner != null) {
+                            bootbox.alert((data.winner===""?"Roboten":data.winner) + " vant!");
+                            game = null;
+                        }
+                        displayGameInfo();
+                    },
+                    error: function (xhr, status, error) {
+                        handleError(xhr, status, error);
+                    }
+                }); 
+            }
         });
         
         $("#newRobotInvite").click(function(event) {
@@ -151,25 +209,12 @@ $(document).ready(function() {
                 success: function(data) {        
                     game = data;
                     drawBoard(context);
+                    displayGameInfo();
                 },
                 error: function (xhr, status, error) {
                     handleError(xhr, status, error);
                 }
             }); 
-        });
-
-        $.ajax({
-            url: 'webresources/players',
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {        
-                
-             
-                //initTable(table, data);
-            },
-            error: function (xhr, status, error) {
-                handleError(xhr, status, error);
-            }
-        });      
+        });    
     });
 });

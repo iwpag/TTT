@@ -11,8 +11,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.Response;
 
 /**
  * Service that handles reading and updating bank user information
@@ -22,23 +20,17 @@ import javax.ws.rs.core.Response;
 public class GameService extends SecureService  {
     
     private static final Logger log = Logger.getLogger(GameService.class.getName());
-
     private static GameController gameController = new GameController();
 
     @POST
     @Consumes("text/plain")
     @Produces("application/json")
     public Game newGameInvite(String opponentUserName) {  // "" opponent means computer AI-player
-        log.info("GameService.newGameInvite(): " + opponentUserName);
+        log.log(Level.INFO, "GameService.newGameInvite(): {0}", opponentUserName);
         String userName = checkLogon();
-        try {
-            Game game = gameController.createGame(userName, opponentUserName, 10);
-            log.info("Added game invite!");        
-            return game;
-        } catch(Exception e) {
-            log.log(Level.SEVERE, "Failed to add game invite", e);        
-            throw new ServerErrorException("Failed to add game invite", Response.Status.INTERNAL_SERVER_ERROR, e);
-        }
+        Game game = gameController.createGame(userName, opponentUserName, 10);
+        log.log(Level.INFO, "Added game invite! game={0}", game);      
+        return game;
     }
     
     @POST
@@ -46,16 +38,22 @@ public class GameService extends SecureService  {
     @Consumes("application/json")
     @Produces("application/json")
     public Game addMove(@PathParam("gameId") String gameId, Move move) {  
-        log.info("GameService.addMove(): " + gameId + ", " + move);
+        log.log(Level.INFO, "GameService.addMove(): {0}, {1}", new Object[]{gameId, move});
         String userName = checkLogon();
-        try {
-            Game game = gameController.move(userName, gameId, move.getColumn(), move.getRow());
-            log.info("Added move! game=" + game);   
-            return game;
-        } catch(Exception e) {
-            log.log(Level.SEVERE, "Failed to add move", e);        
-            throw new ServerErrorException("Failed to add move", Response.Status.INTERNAL_SERVER_ERROR, e);
-        }
+        Game game = gameController.move(gameId, userName, move.getColumn(), move.getRow());
+        log.log(Level.INFO, "Added move! game={0}", game);   
+        return game;
+    }
+    
+    @POST
+    @Path("/{gameId}/accept")
+    @Produces("application/json")
+    public Game acceptInvite(@PathParam("gameId") String gameId) {  
+        log.log(Level.INFO, "GameService.acceptInvite(): {0}", gameId);
+        checkLogon();
+        Game game = gameController.getGame(gameId);
+        game.setInviteAccepted(true);
+        return game;
     }
     
     @GET
@@ -69,7 +67,7 @@ public class GameService extends SecureService  {
     @GET
     @Produces("application/json")
     public List<Game> getGameInvites() {
-        checkLogon();
-	return null; // todo
+        String userName = checkLogon();
+        return gameController.getInvites(userName);
     }
 }

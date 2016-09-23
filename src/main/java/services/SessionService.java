@@ -26,7 +26,6 @@ import repo.SessionRepository;
 public class SessionService {
     
     private static final Logger log = Logger.getLogger(SessionService.class.getName());
-
     private SessionController sessionController = new SessionController(new SessionRepository());
     
     @Context
@@ -38,14 +37,10 @@ public class SessionService {
     public Session create(String userName) {
         log.info("Trying to logon");
         Session session = sessionController.createSession(userName);
-        if(session != null) {
-            request.getSession().invalidate();
-            request.getSession().setAttribute("session", session);
-            log.info("Logged on!");
-            return session;
-        } else {
-            throw new NotAuthorizedException("Kunne ikke logge på");            
-        }
+        request.getSession().invalidate();
+        request.getSession().setAttribute("session", session);
+        log.info("Logged on!");
+        return session;
     }
         
     @GET

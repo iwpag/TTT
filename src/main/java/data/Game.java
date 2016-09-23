@@ -13,20 +13,21 @@ public class Game implements Serializable {
     private int numMoves = 0;
     private String inviter;
     private String invitee;
+    private boolean inviteAccepted = false;
     private String turn;
     private String winner;
-    private Mark[][] board;
+    private Player[][] board;
     private int squares;
     
     public Game() {
     }
 
     public Game(String gameId, String inviter, String invitee, int squares) {
-        board = new Mark[squares][];
+        board = new Player[squares][];
         for(int x=0; x<squares; x++) {
-            board[x] = new Mark[squares];
+            board[x] = new Player[squares];
             for(int y=0; y<squares; y++) {
-                board[x][y] = Mark._;
+                board[x][y] = Player._;
             }         
         }
         this.gameId = gameId;
@@ -42,6 +43,14 @@ public class Game implements Serializable {
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
+    }
+
+    public boolean isInviteAccepted() {
+        return inviteAccepted;
+    }
+
+    public void setInviteAccepted(boolean inviteAccepted) {
+        this.inviteAccepted = inviteAccepted;
     }
 
     public int getSquares() {
@@ -100,11 +109,11 @@ public class Game implements Serializable {
         this.winner = winner;
     }
 
-    public Mark[][] getBoard() {
+    public Player[][] getBoard() {
         return board;
     }
 
-    public void setBoard(Mark[][] board) {
+    public void setBoard(Player[][] board) {
         this.board = board;
     }
 
@@ -117,7 +126,7 @@ public class Game implements Serializable {
     }
 
     public void addMove(int x, int y, String player) {
-        board[y][x] = inviter.equals(player) ? Mark.X : Mark.O;
+        board[y][x] = inviter.equals(player) ? Player.X : Player.O;
         turn = inviter.equals(player) ? invitee : inviter;
         lastMoveAt = new Date();
         numMoves++;
@@ -167,6 +176,4 @@ public class Game implements Serializable {
     public String toString() {
         return "Game{" + "gameId=" + gameId + ", startedAt=" + startedAt + ", lastMoveAt=" + lastMoveAt + ", numMoves=" + numMoves + ", inviter=" + inviter + ", invitee=" + invitee + ", turn=" + turn + ", winner=" + winner + ", board=" + board + ", squares=" + squares + '}';
     }
-    
-    
 }

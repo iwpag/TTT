@@ -26,10 +26,17 @@ body {
     float: left;
 }
 
-.invite-button {
+.invite-button, #infoPanel {
     margin-bottom: 10px;
     margin-top: 10px;
     margin-left: 10px;
     margin-right: 10px;
     width: 120px;
+}
+
+.game-info {
+    font-size: 12pt;
+    font-weight: bold;
+    padding: 4px;
+    color: darkblue;
 }

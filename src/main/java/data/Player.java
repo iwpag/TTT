@@ -1,23 +1,11 @@
 package data;
 
 /**
+ *
  * @author nilstes
  */
-public class Player {
-    String userName;
-
-    public Player() {
-    }
-
-    public Player(String userName) {
-        this.userName = userName;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+public enum Player {
+    X, // Inviter
+    O, // Invitee
+    _  // Empty square
 }
