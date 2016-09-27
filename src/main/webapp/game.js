@@ -1,10 +1,13 @@
+// Global state
 var game = null;
 var myInvite = null;
 var myUser = null;
+
+// Constants
 var lineColor = "#e0e0e0";
 var xColor = "#2020ff";
 var oColor = "#ffff20";
-var numSquares = 10;
+var numSquares = 16;
 var lineWidth = 4;
 var canvasSize = 500;
 var squareSize = canvasSize / numSquares;
@@ -84,15 +87,6 @@ function getLoggedOnUser(success) {
     });
 };
 
-function handleError(xhr, status, error) {
-    myInvite = null;
-    if(xhr.status === 401) {
-        window.location.href = "loggedout.html";
-    } else {
-        window.location.href = "error.html?status=" + xhr.status;
-    }
-}
-
 function drawBoard(context) {
     for(x=0; x<numSquares; x++) {
         for(y=0; y<numSquares; y++) {
@@ -111,7 +105,7 @@ function displayGameInfo() {
     if(game != null) {
         $("#xPlayer").html(game.inviter);
         $("#oPlayer").html(game.invitee === "" ? "robot" : game.invitee);
-        $("#turn").html(game.turn);
+        $("#turn").html(game.winner == null?game.turn:"");
     } else {
         $("#xPlayer").html("");
         $("#oPlayer").html("");
@@ -119,176 +113,104 @@ function displayGameInfo() {
     }
 }
 
+function updateGame(context, data) {
+    game = data;
+    drawBoard(context);
+    displayGameInfo();                            
+    if(data.winner != null) {
+        bootbox.alert((data.winner===""?"Roboten":data.winner) + " vant!");
+        game = null;
+    }
+}
+
+function showNewInviteModal(userNames) {
+    if(userNames.length === 0) {
+        bootbox.alert("Det er ingen andre pålogget akkurat nå");
+    } else {
+        $('#player').html(""); // Clear
+        $.each(userNames, function(index, value) {   
+            $('#player').append($("<option></option>").attr("value", value).text(value)); 
+        });
+
+        // Set modal visible
+        $('#newPlayerInviteModal').modal('show');
+    }
+}
+                
 $(document).ready(function() {
                         
     getLoggedOnUser(function(data) {
+        
+        // Init board
         var canvas = document.getElementById('board');
         canvas.width = canvasSize;
         canvas.height = canvasSize;
-        
         var context = canvas.getContext('2d');
         context.lineWidth = lineWidth;
         context.fillStyle = "#ffffff";
-
         drawBoardLines(context);
 
-        setInterval(function() {
-            
+        // Create game loop
+        setInterval(function() {      
             if(game != null) {
+                // Check if other player has moved
                 if(game.turn !== myUser) {
-                    $.ajax({
-                        url: 'webresources/games/' + game.gameId,
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function(data) {  
-                            game = data;
-                            drawBoard(context);
-                            if(game.winner != null) {
-                                bootbox.alert(game.winner + " vant!");
-                                game = null;
-                            } else {
-                                displayGameInfo();
-                            }
-                        }
+                    ajaxGetGame(game.gameId, function(data) {  
+                        updateGame(context, data);
                     });
                 }
             } else {
                 if(myInvite != null) {
-                    $.ajax({
-                        url: 'webresources/games/' + myInvite.gameId,
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function(data) {  
-                            if(data.inviteAccepted) {
-                                game = data;
-                                myInvite = null;
-                                drawBoard(context);
-                                displayGameInfo();
-                            }
+                    // Check if other player has accepted my invite
+                    ajaxGetGame(myInvite.gameId, function(data) {  
+                        if(data.inviteAccepted) {
+                            myInvite = null;
+                            updateGame(context, data);
                         }
                     });
                 } else {
-                    $.ajax({
-                        url: 'webresources/games',
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function(data) {  
-                            if(data.length > 0) {
-                                game = data[0];
-                                bootbox.confirm("Aksepter invitasjon fra " + game.inviter + "?", function(result) {
-                                    if(result === true) {
-                                        // post accept
-                                        $.ajax({
-                                            url: 'webresources/games/' + game.gameId + "/accept",
-                                            type: 'POST',
-                                            dataType: 'json',
-                                            contentType: 'text/plain; charset=utf-8',
-                                            data: $("#player").val(),
-                                            success: function(data) {                                              
-                                                game = data;                    
-                                                drawBoard(context);
-                                                displayGameInfo();
-                                            },
-                                            error: function (xhr, status, error) {
-                                                game = null;
-                                                handleError(xhr, status, error);
-                                            }
-                                        }); 
-                                    }
+                    // Check for invites from other players
+                    ajaxGetInvite(function(data) {  
+                        var gameId = data.gameId;
+                        bootbox.confirm("Aksepter invitasjon fra " + data.inviter + "?", function(result) {
+                            if(result === true) {
+                                ajaxAcceptGame(gameId, function() {
+                                    updateGame(context, data);
                                 });
                             }
-                        }
+                        });
                     });
                 }
             }
-        }, 5000);
+        }, 3000);
 
+        // Create event handlers
         $("#newPlayerInvite").click(function() {
-            $.ajax({
-                url: 'webresources/opponents',
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {        
-                    // Set select options
-                    if(data.userNames.length === 0) {
-                        bootbox.alert("Det er ingen andre pålogget akkurat nå");
-                    } else {
-                        $('#player').html(""); // Clear
-                        $.each(data.userNames, function(index, value) {   
-                            $('#player').append($("<option></option>").attr("value", value).text(value)); 
-                        });
-                        
-                        // Set modal visible
-                        $('#newPlayerInviteModal').modal('show');
-                    }
-                },
-                error: function (xhr, status, error) {
-                    handleError(xhr, status, error);
-                }
-            }); 
+            ajaxGetPossibleOpponents(function(data) {        
+                showNewInviteModal(data.userNames);
+            });
         });
 
         $("#newInviteSubmit").click(function() {
-            $.ajax({
-                url: 'webresources/games',
-                type: 'POST',
-                dataType: 'json',
-                contentType: 'text/plain; charset=utf-8',
-                data: $("#player").val(),
-                success: function(data) {   
-                    $('#newPlayerInviteModal').modal('hide');
-                    myInvite = data;
-                },
-                error: function (xhr, status, error) {
-                    $('#newPlayerInviteModal').modal('hide');
-                    handleError(xhr, status, error);
-                }
-            }); 
+            $('#newPlayerInviteModal').modal('hide');
+            ajaxPostInvite($("#player").val(), function(data) {   
+                myInvite = data;
+            });
         });
 
         $("#board").click(function(event) {
             if(game != null && game.turn === myUser) {
                 var pos = getBoardPosition(canvas, event);
-
-                $.ajax({
-                    url: 'webresources/games/' + game.gameId + "/moves",
-                    type: 'POST',
-                    dataType: 'json',
-                    contentType: 'application/json; charset=utf-8',
-                    data: JSON.stringify({column: pos.x, row: pos.y}),
-                    success: function(data) {        
-                        // alert(JSON.stringify(data));
-                        game = data;
-                        drawBoard(context);
-                        if(game.winner != null) {
-                            bootbox.alert((data.winner===""?"Roboten":data.winner) + " vant!");
-                            game = null;
-                        }
-                        displayGameInfo();
-                    },
-                    error: function (xhr, status, error) {
-                        handleError(xhr, status, error);
-                    }
-                }); 
+                ajaxPostMove(pos, game.gameId, function(data) {        
+                    updateGame(context, data);
+                });
             }
         });
         
-        $("#newRobotInvite").click(function(event) {
-            $.ajax({
-                url: 'webresources/games',
-                type: 'POST',
-                dataType: 'json',
-                contentType: 'text/plain; charset=utf-8',
-                data: "",
-                success: function(data) {        
-                    game = data;
-                    drawBoard(context);
-                    displayGameInfo();
-                },
-                error: function (xhr, status, error) {
-                    handleError(xhr, status, error);
-                }
-            }); 
+        $("#newRobotInvite").click(function() {
+            ajaxPostInvite("", function(data) {        
+                updateGame(context, data);
+            });
         });    
     });
 });

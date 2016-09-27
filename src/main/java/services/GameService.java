@@ -28,7 +28,7 @@ public class GameService extends SecureService  {
     public Game newGameInvite(String opponentUserName) {  // "" opponent means computer AI-player
         log.log(Level.INFO, "GameService.newGameInvite(): {0}", opponentUserName);
         String userName = checkLogon();
-        Game game = gameController.createGame(userName, opponentUserName, 10);
+        Game game = gameController.createGame(userName, opponentUserName, 16);
         log.log(Level.INFO, "Added game invite! game={0}", game);      
         return game;
     }
