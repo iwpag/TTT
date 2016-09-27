@@ -49,8 +49,8 @@ public class GameService extends SecureService  {
     @Path("/{gameId}/accept")
     @Produces("application/json")
     public Game acceptInvite(@PathParam("gameId") String gameId) {  
-        log.log(Level.INFO, "GameService.acceptInvite(): {0}", gameId);
-        checkLogon();
+        String userName = checkLogon(); 
+        log.log(Level.INFO, "GameService.acceptInvite(): userName={0}, gameId={1}", new Object[]{userName, gameId});
         Game game = gameController.getGame(gameId);
         game.setInviteAccepted(true);
         return game;
@@ -60,7 +60,8 @@ public class GameService extends SecureService  {
     @Path("/{gameId}")
     @Produces("application/json")
     public Game get(@PathParam("gameId") String gameId) {
-        checkLogon(); 
+        String userName = checkLogon(); 
+        log.log(Level.INFO, "GameService.getGame(): userName={0}, gameId={1}", new Object[]{userName, gameId});
         return gameController.getGame(gameId);
     }
        
@@ -68,6 +69,8 @@ public class GameService extends SecureService  {
     @Produces("application/json")
     public List<Game> getGameInvites() {
         String userName = checkLogon();
-        return gameController.getInvites(userName);
+        List<Game> invites = gameController.getInvites(userName);
+        log.log(Level.INFO, "Returning {0} invites to {1}", new Object[]{invites.size(), userName});
+        return invites;
     }
 }

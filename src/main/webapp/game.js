@@ -1,5 +1,6 @@
 var game = null;
 var myInvite = null;
+var myUser = null;
 var lineColor = "#e0e0e0";
 var xColor = "#2020ff";
 var oColor = "#ffff20";
@@ -70,6 +71,7 @@ function getLoggedOnUser(success) {
         type: 'GET',
         dataType: 'json',
         success: function(data) {
+            myUser = data.userName;
             success(data.userName);
         },
         error: function (xhr, status, error) {
@@ -83,6 +85,7 @@ function getLoggedOnUser(success) {
 };
 
 function handleError(xhr, status, error) {
+    myInvite = null;
     if(xhr.status === 401) {
         window.location.href = "loggedout.html";
     } else {
@@ -129,6 +132,77 @@ $(document).ready(function() {
 
         drawBoardLines(context);
 
+        setInterval(function() {
+            
+            if(game != null) {
+                if(game.turn !== myUser) {
+                    $.ajax({
+                        url: 'webresources/games/' + game.gameId,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {  
+                            game = data;
+                            drawBoard(context);
+                            if(game.winner != null) {
+                                bootbox.alert(game.winner + " vant!");
+                                game = null;
+                            } else {
+                                displayGameInfo();
+                            }
+                        }
+                    });
+                }
+            } else {
+                if(myInvite != null) {
+                    $.ajax({
+                        url: 'webresources/games/' + myInvite.gameId,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {  
+                            if(data.inviteAccepted) {
+                                game = data;
+                                myInvite = null;
+                                drawBoard(context);
+                                displayGameInfo();
+                            }
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: 'webresources/games',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {  
+                            if(data.length > 0) {
+                                game = data[0];
+                                bootbox.confirm("Aksepter invitasjon fra " + game.inviter + "?", function(result) {
+                                    if(result === true) {
+                                        // post accept
+                                        $.ajax({
+                                            url: 'webresources/games/' + game.gameId + "/accept",
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            contentType: 'text/plain; charset=utf-8',
+                                            data: $("#player").val(),
+                                            success: function(data) {                                              
+                                                game = data;                    
+                                                drawBoard(context);
+                                                displayGameInfo();
+                                            },
+                                            error: function (xhr, status, error) {
+                                                game = null;
+                                                handleError(xhr, status, error);
+                                            }
+                                        }); 
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        }, 5000);
+
         $("#newPlayerInvite").click(function() {
             $.ajax({
                 url: 'webresources/opponents',
@@ -155,25 +229,25 @@ $(document).ready(function() {
         });
 
         $("#newInviteSubmit").click(function() {
-            alert($("#player").val());
             $.ajax({
-                url: 'webresources/games/',
+                url: 'webresources/games',
                 type: 'POST',
                 dataType: 'json',
                 contentType: 'text/plain; charset=utf-8',
                 data: $("#player").val(),
-                success: function(data) {        
-                    alert(JSON.stringify(data));
+                success: function(data) {   
+                    $('#newPlayerInviteModal').modal('hide');
                     myInvite = data;
                 },
                 error: function (xhr, status, error) {
+                    $('#newPlayerInviteModal').modal('hide');
                     handleError(xhr, status, error);
                 }
             }); 
         });
 
         $("#board").click(function(event) {
-            if(game != null) {
+            if(game != null && game.turn === myUser) {
                 var pos = getBoardPosition(canvas, event);
 
                 $.ajax({

@@ -76,7 +76,7 @@ public class GameController {
     public Game getGame(String gameId) {
         Game game = games.get(gameId);
         if(game == null) {
-            log.warning("Game not found");
+            log.log(Level.WARNING, "Game not found: {0}", gameId);
             throw new NotFoundException("Spill med id " + gameId + " ble ikke funnet");
         }
         return game;
@@ -85,7 +85,8 @@ public class GameController {
     public List<Game> getInvites(String userName) {
         List<Game> invites = new ArrayList<Game>();
         for(Game game : games.values()) {
-            if(userName.equals(game.getInvitee()) && !game.isInviteAccepted()) {
+            if(userName.equals(game.getInvitee()) && !game.isInviteAccepted() && !game.isInviteCommunicated()) {
+                game.setInviteCommunicated(true);
                 invites.add(game);
             }
         }
