@@ -10,6 +10,24 @@ function ajaxHandleError(xhr, status, error) {
     }
 }
 
+function ajaxGetLoggedOnUser(success) {
+    $.ajax({
+        url: 'webresources/session',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            success(data.userName);
+        },
+        error: function (xhr, status, error) {
+            if(xhr.status === 404) { // No session
+                window.location.href = "loggedout.html";
+            } else {
+                handleError(xhr, status, error);
+            }
+        }                   
+    });
+}
+
 function ajaxGetGame(gameId, success) {
     $.ajax({
         url: 'webresources/games/' + gameId,
