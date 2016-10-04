@@ -21,6 +21,9 @@ public class GameAI {
         this.game = game;
     }
 
+    /**
+     * Find the best move for the robot?
+     */
     Position getBestMove() {
         Find find = findPossiblePattern(O,O,O,O,O);
         
@@ -37,6 +40,11 @@ public class GameAI {
         return find.getPosition();
     }
     
+    /**
+     * Tries to find a new pattern AFTER the robot move.
+     * Substitutes all free squares with robot O one by one and
+     * tries to find the pattern when this square belongs to the robot.
+     */
     public Find findPossiblePattern(Player ... pattern) {
         Find find = null;
         
@@ -58,6 +66,14 @@ public class GameAI {
         return find;       
     }
     
+    /**
+     * Tries to find given pattern on board.
+     * The position given by x and y must be part of the pattern
+     * @return an object of the type Find containing 
+     * - the direction the pattern was in,
+     * - the index (position) in the pattern that the x,y position is
+     * - the position given by x and y
+     */
     public Find findPattern(int x, int y, Player ... pattern) {
         int index = findHorizontalPattern(x, y, pattern);
         if(index  >= 0) {
@@ -78,6 +94,9 @@ public class GameAI {
         return null;
     }
     
+    /**
+     * Is the position given by x and y part of a winning 5 in a row?
+     */
     public boolean isWin(int x, int y) {
         Player p = game.getBoard()[y][x];
         return isPatternInAnyDirection(x, y, p, p, p, p, p);
@@ -96,7 +115,7 @@ public class GameAI {
             for(int j=0; j<pattern.length; j++) { // x+1, y
                 positions.add(Position.at(x-i+j, y));
             }
-            if(isInRange(positions) && isRightPlayers(positions, pattern)) {
+            if(isInRange(positions) && matchPattern(positions, pattern)) {
                 return i;
             }
         }
@@ -109,7 +128,7 @@ public class GameAI {
             for(int j=0; j<pattern.length; j++) {
                 positions.add(Position.at(x, y-i+j));
             }
-            if(isInRange(positions) && isRightPlayers(positions, pattern)) {
+            if(isInRange(positions) && matchPattern(positions, pattern)) {
                 return i;
             }
         }
@@ -123,7 +142,7 @@ public class GameAI {
             for(int j=0; j<pattern.length; j++) {
                 positions.add(Position.at(x-i+j, y-i+j));
             }
-            if(isInRange(positions) && isRightPlayers(positions, pattern)) {
+            if(isInRange(positions) && matchPattern(positions, pattern)) {
                 return i;
             }
         }
@@ -137,13 +156,16 @@ public class GameAI {
             for(int j=0; j<pattern.length; j++) {
                 positions.add(Position.at(x-i+j, y+i-j));
             }
-            if(isInRange(positions) && isRightPlayers(positions, pattern)) {
+            if(isInRange(positions) && matchPattern(positions, pattern)) {
                 return i;
             }
         }
         return -1;
     }
     
+    /**
+     * Are all the given positions in the range of the board?
+     */
     public boolean isInRange(List<Position> positions) {
         for(Position p : positions) {
             if(p.x() < 0 || p.y() < 0 || p.x() >= game.getBoard().length || p.y() >= game.getBoard().length) {
@@ -153,15 +175,16 @@ public class GameAI {
         return true;
     }
     
-    public boolean isRightPlayers(List<Position> positions, Player[] players) {
+    /**
+     * Is the given pattern the same as the given positions on the board?
+     */
+    public boolean matchPattern(List<Position> positions, Player[] pattern) {
         for(int i=0; i<positions.size(); i++) {
             Position p = positions.get(i);
-            if(players[i] != game.getBoard()[p.y()][p.x()]) {
+            if(pattern[i] != game.getBoard()[p.y()][p.x()]) {
                 return false; // Not equal
             }
         }   
         return true;
     }
-
-
 }
