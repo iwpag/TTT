@@ -74,9 +74,9 @@ function ajaxGetPossibleOpponents(success) {
     }); 
 }
 
-function ajaxPostInvite(player, success) {
+function ajaxPostInvite(player, success, numSquares) {
     $.ajax({
-        url: 'webresources/games',
+        url: 'webresources/games/' + numSquares,
         type: 'POST',
         dataType: 'json',
         contentType: 'text/plain; charset=utf-8',

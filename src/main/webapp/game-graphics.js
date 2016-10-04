@@ -2,12 +2,15 @@
 var lineColor = "#e0e0e0";
 var xColor = "#2020ff";
 var oColor = "#ffff20";
-var numSquares = 16;
 var lineWidth = 4;
-var canvasSize = 500;
-var squareSize = canvasSize / numSquares;
+var numSquares;
+var canvasSize;
+var squareSize;
 
-function initCanvas(canvas) {
+function initCanvas(canvas, boardPixels, boardSquares) {
+    numSquares = boardSquares;
+    canvasSize = boardPixels;
+    squareSize = canvasSize / numSquares;
     canvas.width = canvasSize;
     canvas.height = canvasSize;
     return canvas;

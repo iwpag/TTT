@@ -36,7 +36,10 @@ public class GameAI {
         if(find == null) {
             find = findPossiblePattern(O,O);
         }
- 
+        if(find == null) {
+            find = findPossiblePattern(O);
+        }
+        
         return find.getPosition();
     }
     

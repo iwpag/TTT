@@ -23,12 +23,13 @@ public class GameService extends SecureService  {
     private static GameController gameController = new GameController();
 
     @POST
+    @Path("/{numSquares}")
     @Consumes("text/plain")
     @Produces("application/json")
-    public Game newGameInvite(String opponentUserName) {  // "" opponent means computer AI-player
-        log.log(Level.INFO, "GameService.newGameInvite(): {0}", opponentUserName);
+    public Game newGameInvite(String opponentUserName, @PathParam("numSquares") int numSquares) {  // "" opponent means computer AI-player
+        log.log(Level.INFO, "GameService.newGameInvite(): {0}, {1}", new Object[]{opponentUserName, numSquares});
         String userName = checkLogon();
-        Game game = gameController.createGame(userName, opponentUserName, 16);
+        Game game = gameController.createGame(userName, opponentUserName, numSquares);
         log.log(Level.INFO, "Added game invite! game={0}", game);      
         return game;
     }

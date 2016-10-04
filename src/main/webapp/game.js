@@ -44,7 +44,9 @@ $(document).ready(function() {
         var myInvite = null;
 
         // Init board
-        var canvas = initCanvas(document.getElementById('board'));       
+        var boardPixels = 500;
+        var boardSquares = 20;
+        var canvas = initCanvas(document.getElementById('board'), boardPixels, boardSquares);       
         var context = createContext(canvas);
         drawBoardGrid(context);
 
@@ -93,7 +95,7 @@ $(document).ready(function() {
             $('#newPlayerInviteModal').modal('hide');
             ajaxPostInvite($("#player").val(), function(data) {   
                 myInvite = data;
-            });
+            }, boardSquares);
         });
 
         $("#board").click(function(event) {
@@ -108,7 +110,7 @@ $(document).ready(function() {
         $("#newRobotInvite").click(function() {
             ajaxPostInvite("", function(data) {        
                 myGame = updateGame(context, data);
-            });
+            }, boardSquares);
         });    
     });
 });
