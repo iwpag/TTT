@@ -6,6 +6,7 @@ import static data.Player.O;
 import static data.Player.X;
 import static data.Player.e;
 import data.Position;
+import java.util.List;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -26,9 +27,32 @@ public class GameAIBestMoveTest extends TestCase {
         Game game = new Game("testId", "inviter", "invitee", 5);
         game.setBoard(board);
         GameAI ai = new GameAI(game);
-        Position pos = ai.getBestMove();
+        List<Position> pos = ai.getBestMoves();
         
-        assertEquals(4, pos.x());
-        assertEquals(0, pos.y());
+        assertTrue(pos.contains(Position.at(4, 0)));
+    }
+
+    @Test
+    public void testThatAICanFindTwoInARow() {
+        Player[][] board = {
+            {e,e,e,e,e},
+            {X,e,e,e,e},
+            {e,O,e,e,e},
+            {e,e,e,e,e},
+            {e,e,e,e,e}        
+        };
+        Game game = new Game("testId", "inviter", "invitee", 5);
+        game.setBoard(board);
+        GameAI ai = new GameAI(game);
+        List<Position> pos = ai.getBestMoves();
+        
+        assertTrue(pos.contains(Position.at(1, 1)));
+        assertTrue(pos.contains(Position.at(2, 2)));
+        assertTrue(pos.contains(Position.at(1, 3)));
+        assertTrue(pos.contains(Position.at(0, 2)));
+        assertTrue(pos.contains(Position.at(2, 1)));
+        assertTrue(pos.contains(Position.at(2, 3)));
+        assertTrue(pos.contains(Position.at(0, 3)));
+        assertEquals(7, pos.size());
     }
 }

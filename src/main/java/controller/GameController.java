@@ -79,10 +79,11 @@ public class GameController {
     
         // Robot move?
         if(game.getWinner() == null && game.getNumMoves() < game.getSquares()*game.getSquares() && game.getTurn().equals("")) {
-            Position pos = ai.getBestMove();
-            if(pos == null) {
+            List<Position> positions = ai.getBestMoves();
+            if(positions.size() == 0) {
                 throw new ServerErrorException("Couldn't find move", Status.INTERNAL_SERVER_ERROR);
             }
+            Position pos = positions.get(rnd.nextInt(positions.size()));
             game.addMove(pos.x(), pos.y(), "");
             if(ai.isWin(pos.x(), pos.y())) {
                 game.setWinner("");

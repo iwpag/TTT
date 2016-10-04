@@ -9,7 +9,6 @@ import static data.Player.e;
 import data.Position;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 /**
@@ -18,7 +17,6 @@ import java.util.Random;
 public class GameAI {
     
     private Game game = null;
-    private Random rnd = new Random();
     
     GameAI(Game game) {
         this.game = game;
@@ -27,23 +25,27 @@ public class GameAI {
     /**
      * Find the best move for the robot?
      */
-    Position getBestMove() {
-        Find find = findPossiblePattern(O,O,O,O,O);
+    List<Position> getBestMoves() {
+        List<Find> finds = findPossiblePattern(O,O,O,O,O);
         
-        if(find == null) {
-            find = findPossiblePattern(O,O,O,O);
+        if(finds.isEmpty()) {
+            finds = findPossiblePattern(O,O,O,O);
         }
-        if(find == null) {
-            find = findPossiblePattern(O,O,O);
+        if(finds.isEmpty()) {
+            finds = findPossiblePattern(O,O,O);
         }
-        if(find == null) {
-            find = findPossiblePattern(O,O);
+        if(finds.isEmpty()) {
+            finds = findPossiblePattern(O,O);
         }
-        if(find == null) {
-            find = findPossiblePattern(O);
+        if(finds.isEmpty()) {
+            finds = findPossiblePattern(O);
         }
         
-        return find.getPosition();
+        List<Position> positions = new ArrayList<Position>();
+        for(Find find : finds) {
+            positions.add(find.getPosition());
+        }
+        return positions;
     }
     
     /**
@@ -51,7 +53,7 @@ public class GameAI {
      * Substitutes all free squares with robot O one by one and
      * tries to find the pattern when this square belongs to the robot.
      */
-    public Find findPossiblePattern(Player ... pattern) {
+    public List<Find> findPossiblePattern(Player ... pattern) {
         List<Find> foundMoves = new ArrayList<Find>();
         
         // Test all possible moves
@@ -74,7 +76,7 @@ public class GameAI {
         }
         
         // Choose one of the possible moves (ransom)
-        return foundMoves.size()==0?null:foundMoves.get(rnd.nextInt(foundMoves.size()));        
+        return foundMoves;        
     }
     
     /**
