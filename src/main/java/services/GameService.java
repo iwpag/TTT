@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import repo.GameRepository;
 
 /**
  * Service that handles reading and updating bank user information
@@ -20,7 +21,7 @@ import javax.ws.rs.Produces;
 public class GameService extends SecureService  {
     
     private static final Logger log = Logger.getLogger(GameService.class.getName());
-    private static GameController gameController = new GameController();
+    private static GameController gameController = new GameController(new GameRepository());
 
     @POST
     @Path("/{numSquares}")

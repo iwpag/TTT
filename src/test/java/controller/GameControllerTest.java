@@ -5,6 +5,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import static junit.framework.TestCase.assertNotNull;
 import org.junit.Test;
+import repo.GameRepository;
 
 /**
  * @author nilstes
@@ -13,13 +14,13 @@ public class GameControllerTest {
 
     @Test(expected = NotFoundException.class)
     public void testThatPlayerCannotMoveIfGameDoesNotExist() {
-        GameController c = new GameController();
+        GameController c = new GameController(new GameRepository());
         c.move("player", "nonExistentGameId", 1, 2);
     }
 
     @Test(expected = ClientErrorException.class)
     public void testThatPlayerCannotMoveIfNotPlayersTurn() {
-        GameController c = new GameController();
+        GameController c = new GameController(new GameRepository());
         Game game = c.createGame("inviter", "invitee", 10);
         if(game.getTurn().equals("inviter")) {
             c.move(game.getGameId(), "invitee", 2, 3);
@@ -30,7 +31,7 @@ public class GameControllerTest {
     
     @Test(expected = ClientErrorException.class)
     public void testThatPlayerCannotMoveToOccupiedSquare() {
-        GameController c = new GameController();
+        GameController c = new GameController(new GameRepository());
         Game game = c.createGame("inviter", "invitee", 10);
         game = c.move(game.getGameId(), game.getTurn(), 2, 2);
         assertNotNull(game);
@@ -39,7 +40,7 @@ public class GameControllerTest {
     
     @Test(expected = ClientErrorException.class)
     public void testThatPlayerCannotMoveToPositionOutOfRange() {
-        GameController c = new GameController();
+        GameController c = new GameController(new GameRepository());
         Game game = c.createGame("inviter", "invitee", 10);
         assertNotNull(game);
         c.move(game.getGameId(), game.getTurn(), 12, 21);

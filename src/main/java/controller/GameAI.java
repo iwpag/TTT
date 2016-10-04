@@ -4,10 +4,12 @@ import data.Direction;
 import data.Game;
 import data.Player;
 import static data.Player.O;
+import static data.Player.X;
 import static data.Player.e;
 import data.Position;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -16,6 +18,7 @@ import java.util.List;
 public class GameAI {
     
     private Game game = null;
+    private Random rnd = new Random();
     
     GameAI(Game game) {
         this.game = game;
@@ -49,24 +52,29 @@ public class GameAI {
      * tries to find the pattern when this square belongs to the robot.
      */
     public Find findPossiblePattern(Player ... pattern) {
-        Find find = null;
+        List<Find> foundMoves = new ArrayList<Find>();
         
         // Test all possible moves
-        for(int i=0; find == null && i<game.getSquares(); i++) {
-            for(int j=0; find == null && j<game.getSquares(); j++) {
+        for(int i=0; i<game.getSquares(); i++) {
+            for(int j=0; j<game.getSquares(); j++) {
                 if(game.getBoard()[j][i] == e) { // If position is empty
                     // Set current square to temporarily to robot player (Robot is always O) 
                     game.getBoard()[j][i] = O;         
                     
                     // Test new pattern
-                    find = findPattern(i, j, pattern);
+                    Find find = findPattern(i, j, pattern);
+                    if(find != null) {
+                        foundMoves.add(find);
+                    }
                     
                     // Set current back to empty
                     game.getBoard()[j][i] = e; 
                 }
             }            
         }
-        return find;       
+        
+        // Choose one of the possible moves (ransom)
+        return foundMoves.size()==0?null:foundMoves.get(rnd.nextInt(foundMoves.size()));        
     }
     
     /**

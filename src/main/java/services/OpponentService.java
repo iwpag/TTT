@@ -24,13 +24,9 @@ public class OpponentService extends SecureService  {
 
     @GET
     @Produces("application/json")
-    public Opponents getAllPlayers() {
+    public Opponents getAllPossibleOpponents() {
+        log.log(Level.INFO, "OpponentServicegetPossibleOpponents()");
         String userName = checkLogon();
-        List<String> allPlayers = sessionController.getAllLoggedOnPlayers();
-        allPlayers.remove(userName);
-        Opponents opponents = new Opponents();
-        opponents.setUserNames(allPlayers);
-        log.log(Level.INFO, "Returning {0} possible opponents", allPlayers.size());
-	return opponents;
+        return sessionController.getPossibleOpponents(userName);
     }
 }

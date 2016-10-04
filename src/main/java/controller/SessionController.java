@@ -1,10 +1,7 @@
 package controller;
 
+import data.Opponents;
 import data.Session;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.ws.rs.NotAuthorizedException;
 import repo.SessionRepository;
 
 /**
@@ -19,21 +16,14 @@ public class SessionController {
     }
     
     public Session createSession(String userName) {
-        if(repo.getAllUserNames().contains(userName)) {
-            throw new NotAuthorizedException("Bruker " + userName + " er allerede pålogget");
-        }  
-        Session session = new Session();
-        session.setUserName(userName);
-        session.setLoggedOn(new Date());
-        repo.addSession(session);
-        return session;
+        return null; // todo
     }
 
     public void removeSession(String userName) {
-        repo.removeSession(userName);
+        // todo
     }
     
-    public List<String> getAllLoggedOnPlayers() {
-        return new ArrayList<String>(repo.getAllUserNames());
+    public Opponents getPossibleOpponents(String myUserName) {
+        throw null; // todo
     }
 }

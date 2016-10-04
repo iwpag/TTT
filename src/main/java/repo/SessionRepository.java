@@ -10,6 +10,7 @@ import java.util.Map;
  */
 public class SessionRepository {
 
+    // This should really be a database repo
     private static Map<String, Session> sessions = new HashMap<String, Session>();
     
     public void removeSession(String userName) {

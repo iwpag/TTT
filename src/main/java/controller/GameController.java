@@ -17,6 +17,7 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import repo.GameRepository;
 
 
 /**
@@ -26,13 +27,18 @@ public class GameController {
 
     private static final Logger log = Logger.getLogger(GameController.class.getName());
     private static Random rnd = new SecureRandom();  
-    private static Map<String, Game> games = new HashMap<String, Game>();
+    
+    private GameRepository repo;
+
+    public GameController(GameRepository repo) {
+        this.repo = repo;
+    }
     
     public Game createGame(String inviter, String invitee, int squares) {
         String gameId = new BigInteger(128, rnd).toString(36);
         Game game = new Game(gameId, inviter, invitee, squares);
         game.setTurn(rnd.nextBoolean() ? inviter : invitee);
-        games.put(gameId, game);
+        repo.addGame(game);
             
         // Robot game?
         if(game.getTurn().equals("")) {
@@ -87,7 +93,7 @@ public class GameController {
     }
 
     public Game getGame(String gameId) {
-        Game game = games.get(gameId);
+        Game game = repo.getGame(gameId);
         if(game == null) {
             log.log(Level.WARNING, "Game not found: {0}", gameId);
             throw new NotFoundException("Spill med id " + gameId + " ble ikke funnet");
@@ -97,7 +103,7 @@ public class GameController {
 
     public List<Game> getInvites(String userName) {
         List<Game> invites = new ArrayList<Game>();
-        for(Game game : games.values()) {
+        for(Game game : repo.getAllGames()) {
             if(userName.equals(game.getInvitee()) && !game.isInviteAccepted() && !game.isInviteCommunicated()) {
                 game.setInviteCommunicated(true);
                 invites.add(game);
