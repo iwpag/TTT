@@ -2,6 +2,7 @@ package controller;
 
 import data.Game;
 import data.Player;
+import data.Position;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -13,7 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 
 /**
@@ -25,8 +28,6 @@ public class GameController {
     private static Random rnd = new SecureRandom();  
     private static Map<String, Game> games = new HashMap<String, Game>();
     
-    private GameAI ai = new GameAI();
-    
     public Game createGame(String inviter, String invitee, int squares) {
         String gameId = new BigInteger(128, rnd).toString(36);
         Game game = new Game(gameId, inviter, invitee, squares);
@@ -36,7 +37,7 @@ public class GameController {
         // Robot game?
         if(game.getTurn().equals("")) {
             game.setInviteAccepted(true);
-            ai.move(game);
+            game.addMove(squares/2, squares/2, ""); // Middle of board
         }
         return game;
     }
@@ -57,17 +58,29 @@ public class GameController {
         }
         
         // Empty square?
-        if(game.getBoard()[y][x] != Player._) {
+        if(game.getBoard()[y][x] != Player.e) {
             log.log(Level.WARNING, "Square not empty: {0},{1}", new Object[]{x, y});
             throw new ClientErrorException("Rute ikke tom: " + x + "," + y, Response.Status.BAD_REQUEST);
         }
         
+        GameAI ai =  new GameAI(game);
+        
         // Make move
         game.addMove(x, y, player);
-        
+        if(ai.isWin(x, y)) {
+            game.setWinner(player);
+        }
+    
         // Robot move?
         if(game.getWinner() == null && game.getNumMoves() < game.getSquares()*game.getSquares() && game.getTurn().equals("")) {
-            ai.move(game);
+            Position pos = ai.getBestMove();
+            if(pos == null) {
+                throw new ServerErrorException("Couldn't find move", Status.INTERNAL_SERVER_ERROR);
+            }
+            game.addMove(pos.x(), pos.y(), "");
+            if(ai.isWin(pos.x(), pos.y())) {
+                game.setWinner("");
+            }
         }
         
         return game;

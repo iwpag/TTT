@@ -7,5 +7,5 @@ package data;
 public enum Player {
     X, // Inviter
     O, // Invitee
-    _  // Empty square
+    e  // Empty square
 }

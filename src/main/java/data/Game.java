@@ -28,7 +28,7 @@ public class Game implements Serializable {
         for(int x=0; x<squares; x++) {
             board[x] = new Player[squares];
             for(int y=0; y<squares; y++) {
-                board[x][y] = Player._;
+                board[x][y] = Player.e;
             }         
         }
         this.gameId = gameId;
@@ -139,48 +139,8 @@ public class Game implements Serializable {
         turn = inviter.equals(player) ? invitee : inviter;
         lastMoveAt = new Date();
         numMoves++;
-        if(isWin(x, y)) {
-            setWinner(player);
-        }
-    }
-
-    public boolean isWin(int x, int y) {
-        return isHorizontalWin(x, y) || 
-                isVerticalWin(x, y) || 
-                isMainDiagonalWin(x, y) ||
-                isBiDiagonalWin(x, y);
-    }
-
-    public boolean isHorizontalWin(int x, int y) {
-        return isTripleEqualAndInRange(x-2, y, x-1, y, x, y) || 
-                isTripleEqualAndInRange(x-1, y, x, y, x+1, y) || 
-                isTripleEqualAndInRange(x, y, x+1, y, x+2, y);
     }
     
-    public boolean isVerticalWin(int x, int y) {
-        return isTripleEqualAndInRange(x, y-2, x, y-1, x, y) || 
-                isTripleEqualAndInRange(x, y-1, x, y, x, y+1) || 
-                isTripleEqualAndInRange(x, y, x, y+1, x, y+2);
-    }
-          
-    public boolean isMainDiagonalWin(int x, int y) {
-        return isTripleEqualAndInRange(x-2, y-2, x-1, y-1, x, y) || 
-                isTripleEqualAndInRange(x-1, y-1, x, y, x+1, y+1) || 
-                isTripleEqualAndInRange(x, y, x+1, y+1, x+2, y+2);
-    }
-        
-    public boolean isBiDiagonalWin(int x, int y) {
-        return isTripleEqualAndInRange(x-2, y+2, x-1, y+1, x, y) || 
-                isTripleEqualAndInRange(x-1, y+1, x, y, x+1, y-1) || 
-                isTripleEqualAndInRange(x, y, x+1, y-1, x+2, y-2);
-    }
-    
-    private boolean isTripleEqualAndInRange(int x1, int y1, int x2, int y2, int x3, int y3) {
-        if(x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0 || x3 < 0 || y3 < 0) return false;
-        if(x1 >= squares || y1 >= squares || x2 >= squares || y2 >= squares || x3 >= squares || y3 >= squares) return false;
-        return board[y1][x1] == board[y2][x2] && board[y2][x2] == board[y3][x3];
-    }
-
     @Override
     public String toString() {
         return "Game{" + "gameId=" + gameId + ", startedAt=" + startedAt + ", lastMoveAt=" + lastMoveAt + ", numMoves=" + numMoves + ", inviter=" + inviter + ", invitee=" + invitee + ", turn=" + turn + ", winner=" + winner + ", board=" + board + ", squares=" + squares + '}';
