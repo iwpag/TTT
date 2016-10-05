@@ -28,4 +28,9 @@ public class Session implements Serializable {
     public void setLoggedOn(Date loggedOn) {
         this.loggedOn = loggedOn;
     }
+
+    @Override
+    public String toString() {
+        return "Session{" + "userName=" + userName + ", loggedOn=" + loggedOn + '}';
+    }
 }

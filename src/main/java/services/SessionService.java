@@ -4,6 +4,7 @@ import controller.SessionController;
 import data.Session;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -39,7 +40,7 @@ public class SessionService {
         Session session = sessionController.createSession(userName);
         request.getSession().invalidate();
         request.getSession().setAttribute("session", session);
-        log.info("Logged on!");
+        log.log(Level.INFO, "Logged on: session={0}", session);
         return session;
     }
         
