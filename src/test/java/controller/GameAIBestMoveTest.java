@@ -55,4 +55,44 @@ public class GameAIBestMoveTest extends TestCase {
         assertTrue(pos.contains(Position.at(0, 3)));
         assertEquals(7, pos.size());
     }
+    @Test
+    public void testThatAICanFindTreeInARow(){
+        Player[][] board = {
+            {e,e,e,e,e},
+            {e,X,X,e,e},
+            {e,O,O,e,e},
+            {e,e,e,e,e},
+            {e,e,e,e,e}        
+        };
+        
+        Game game = new Game("testId", "inviter", "invitee", 5);
+        game.setBoard(board);
+        GameAI ai = new GameAI(game);
+        List<Position> pos = ai.getBestMoves();
+        assertTrue(pos.contains(Position.at(0, 2)));
+        assertTrue(pos.contains(Position.at(3, 2)));
+        assertEquals(2, pos.size());
+    }
+    
+    @Test
+    public void testThatAICanFindFourInARow(){
+        Player[][] board = {
+            {e,e,e,e,e},
+            {e,X,X,O,e},
+            {e,O,O,O,e},
+            {e,X,X,O,e},
+            {e,X,e,e,e}        
+        };
+        
+        Game game = new Game("testId", "inviter", "invitee", 5);
+        game.setBoard(board);
+        GameAI ai = new GameAI(game);
+        List<Position> pos = ai.getBestMoves();
+        assertTrue(pos.contains(Position.at(0, 2)));
+        assertTrue(pos.contains(Position.at(4, 2)));
+        assertTrue(pos.contains(Position.at(3, 0)));
+        assertTrue(pos.contains(Position.at(3, 4)));
+        assertEquals(4, pos.size());
+    }
+    
 }
