@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>Bondesjakk</title>
+        <link href="css/main.css" rel="stylesheet">
+
+        <!-- Bootstrap core CSS -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">       
+        <link href="css/dataTables.bootstrap.min.css" rel="stylesheet">
+        <link href="css/responsive.bootstrap.min.css" rel="stylesheet">
+        
+        <!-- Custom styles for this template -->
+        <link href="css/main.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <div class="container">
+            <!-- Show board -->
+            <div class="panel panel-info">
+                <div class="panel-heading clearfix">
+                    <h4 class="pull-left">Bondesjakk</h4>
+                    <div class="btn-group pull-right">
+                        <a href="index.html" class="btn btn-primary" id="logout">Logg ut</a>
+                    </div>
+                </div>   
+                <div class="panel-body">
+                    <div id="leftPanel">
+                        <div id="infoPanel">
+                            <p class="bg-info game-info">X: <span id="xPlayer"></span></p>
+                            <p class="bg-info game-info">O: <span id="oPlayer"></span></p>
+                            <p class="bg-info game-info">Tur: <span id="turn"></span></p>
+                        </div>
+                        <a href="#" class="btn btn-primary invite-button" data-toggle="modal" id="newPlayerInvite">Inviter spiller</a>  <!-- data-target="#newPlayerInviteModal"  -->
+                        <a href="#" class="btn btn-primary invite-button" data-toggle="modal" id="newRobotInvite">Inviter robot</a>
+                    </div>
+
+                    <div id="board-container">
+                        <canvas id="board"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- New Invite Modal -->
+            <div id="newPlayerInviteModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Ny invitasjon</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="player">Spiller:</label>
+                                <select class="form-control" id="player">
+                                </select>
+                            </div>
+                            <button type="button" id="newInviteSubmit" class="btn btn-default">Inviter</button>
+                            <button type="button" class="btn btn-default pull-right" data-dismiss="modal">Avbryt</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- /container -->
+
+        <!-- Bootstrap core JavaScript
+        ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="js/jquery.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/bootbox.min.js"></script>
+        <script src="js/jquery.dataTables.min.js"></script>
+        <script src="js/dataTables.bootstrap.min.js"></script>
+        <script src="js/dataTables.select.min.js"></script> 
+        <script src="game-graphics.js"></script>    
+        <script src="game-ajax.js"></script>    
+        <script src="game.js"></script>    
+    </body>
+</html>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TicTacToe</a> &gt; <a href="index.source.html" class="el_package">services</a> &gt; <span class="el_source">GameService.java</span></div><h1>GameService.java</h1><pre class="source lang-java linenums">package services;
+
+import controller.GameController;
+import data.*;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import repo.GameRepository;
+
+/**
+ * Service that handles reading and updating bank user information
+ * @author nilstes
+ */
+@Path(&quot;games&quot;)
+<span class="nc" id="L21">public class GameService extends SecureService  {</span>
+    
+<span class="nc" id="L23">    private static final Logger log = Logger.getLogger(GameService.class.getName());</span>
+<span class="nc" id="L24">    private static GameController gameController = new GameController(new GameRepository());</span>
+
+    @POST
+    @Path(&quot;/{numSquares}&quot;)
+    @Consumes(&quot;text/plain&quot;)
+    @Produces(&quot;application/json&quot;)
+    public Game newGameInvite(String opponentUserName, @PathParam(&quot;numSquares&quot;) int numSquares) {  // &quot;&quot; opponent means computer AI-player
+<span class="nc" id="L31">        log.log(Level.INFO, &quot;GameService.newGameInvite(): {0}, {1}&quot;, new Object[]{opponentUserName, numSquares});</span>
+<span class="nc" id="L32">        String userName = checkLogon();</span>
+<span class="nc" id="L33">        Game game = gameController.createGame(userName, opponentUserName, numSquares);</span>
+<span class="nc" id="L34">        log.log(Level.INFO, &quot;Added game invite! game={0}&quot;, game);      </span>
+<span class="nc" id="L35">        return game;</span>
+    }
+    
+    @POST
+    @Path(&quot;/{gameId}/moves&quot;)
+    @Consumes(&quot;application/json&quot;)
+    @Produces(&quot;application/json&quot;)
+    public Game addMove(@PathParam(&quot;gameId&quot;) String gameId, Move move) {  
+<span class="nc" id="L43">        log.log(Level.INFO, &quot;GameService.addMove(): {0}, {1}&quot;, new Object[]{gameId, move});</span>
+<span class="nc" id="L44">        String userName = checkLogon();</span>
+<span class="nc" id="L45">        Game game = gameController.move(gameId, userName, move.getColumn(), move.getRow());</span>
+<span class="nc" id="L46">        log.log(Level.INFO, &quot;Added move! game={0}&quot;, game);   </span>
+<span class="nc" id="L47">        return game;</span>
+    }
+    
+    @POST
+    @Path(&quot;/{gameId}/accept&quot;)
+    @Produces(&quot;application/json&quot;)
+    public Game acceptInvite(@PathParam(&quot;gameId&quot;) String gameId) {  
+<span class="nc" id="L54">        String userName = checkLogon(); </span>
+<span class="nc" id="L55">        log.log(Level.INFO, &quot;GameService.acceptInvite(): userName={0}, gameId={1}&quot;, new Object[]{userName, gameId});</span>
+<span class="nc" id="L56">        Game game = gameController.getGame(gameId);</span>
+<span class="nc" id="L57">        game.setInviteAccepted(true);</span>
+<span class="nc" id="L58">        return game;</span>
+    }
+    
+    @GET
+    @Path(&quot;/{gameId}&quot;)
+    @Produces(&quot;application/json&quot;)
+    public Game get(@PathParam(&quot;gameId&quot;) String gameId) {
+<span class="nc" id="L65">        String userName = checkLogon(); </span>
+<span class="nc" id="L66">        log.log(Level.INFO, &quot;GameService.getGame(): userName={0}, gameId={1}&quot;, new Object[]{userName, gameId});</span>
+<span class="nc" id="L67">        return gameController.getGame(gameId);</span>
+    }
+       
+    @GET
+    @Produces(&quot;application/json&quot;)
+    public List&lt;Game&gt; getGameInvites() {
+<span class="nc" id="L73">        String userName = checkLogon();</span>
+<span class="nc" id="L74">        List&lt;Game&gt; invites = gameController.getInvites(userName);</span>
+<span class="nc" id="L75">        log.log(Level.INFO, &quot;Returning {0} invites to {1}&quot;, new Object[]{invites.size(), userName});</span>
+<span class="nc" id="L76">        return invites;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

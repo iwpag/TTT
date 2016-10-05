@@ -3,6 +3,6 @@ sudo: false
 script: mvn clean verify
 notifications:
   email:
-    - nils.tesdal@gmail.com
+    - gunnarkd@hotmail.com
 after_success:
   - bash <(curl -s https://codecov.io/bash)

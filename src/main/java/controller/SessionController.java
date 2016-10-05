@@ -16,6 +16,12 @@ public class SessionController {
     }
     
     public Session createSession(String userName) {
+        if(!repo.existsSession(userName)){
+            Session s=new Session();
+            s.setUserName(userName);
+            repo.addSession(s);
+            return s;
+        }
         return null; // todo
     }
 

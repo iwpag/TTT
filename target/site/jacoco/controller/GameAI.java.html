@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameAI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TicTacToe</a> &gt; <a href="index.source.html" class="el_package">controller</a> &gt; <span class="el_source">GameAI.java</span></div><h1>GameAI.java</h1><pre class="source lang-java linenums">package controller;
+
+import data.Direction;
+import data.Game;
+import data.Player;
+import static data.Player.O;
+import static data.Player.X;
+import static data.Player.e;
+import data.Position;
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * @author nilstes
+ */
+public class GameAI {
+    
+<span class="fc" id="L19">    private Game game = null;</span>
+    
+<span class="fc" id="L21">    GameAI(Game game) {</span>
+<span class="fc" id="L22">        this.game = game;</span>
+<span class="fc" id="L23">    }</span>
+
+    /**
+     * Find the best move for the robot?
+     */
+    List&lt;Position&gt; getBestMoves() {
+<span class="fc" id="L29">        List&lt;Find&gt; finds = findPossiblePattern(O,O,O,O,O);</span>
+        
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if(finds.isEmpty()) {</span>
+<span class="fc" id="L32">            finds = findPossiblePattern(O,O,O,O);</span>
+        }
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if(finds.isEmpty()) {</span>
+<span class="fc" id="L35">            finds = findPossiblePattern(O,O,O);</span>
+        }
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if(finds.isEmpty()) {</span>
+<span class="fc" id="L38">            finds = findPossiblePattern(O,O);</span>
+        }
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if(finds.isEmpty()) {</span>
+<span class="nc" id="L41">            finds = findPossiblePattern(O);</span>
+        }
+        
+<span class="fc" id="L44">        List&lt;Position&gt; positions = new ArrayList&lt;Position&gt;();</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for(Find find : finds) {</span>
+<span class="fc" id="L46">            positions.add(find.getPosition());</span>
+<span class="fc" id="L47">        }</span>
+<span class="fc" id="L48">        return positions;</span>
+    }
+    
+    /**
+     * Tries to find a new pattern AFTER the robot move.
+     * Substitutes all free squares with robot O one by one and
+     * tries to find the pattern when this square belongs to the robot.
+     */
+    public List&lt;Find&gt; findPossiblePattern(Player ... pattern) {
+<span class="fc" id="L57">        List&lt;Find&gt; foundMoves = new ArrayList&lt;Find&gt;();</span>
+        
+        // Test all possible moves
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        for(int i=0; i&lt;game.getSquares(); i++) {</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">            for(int j=0; j&lt;game.getSquares(); j++) {</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">                if(game.getBoard()[j][i] == e) { // If position is empty</span>
+                    // Set current square to temporarily to robot player (Robot is always O) 
+<span class="fc" id="L64">                    game.getBoard()[j][i] = O;         </span>
+                    
+                    // Test new pattern
+<span class="fc" id="L67">                    Find find = findPattern(i, j, pattern);</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                    if(find != null) {</span>
+<span class="fc" id="L69">                        foundMoves.add(find);</span>
+                    }
+                    
+                    // Set current back to empty
+<span class="fc" id="L73">                    game.getBoard()[j][i] = e; </span>
+                }
+            }            
+        }
+        
+        // Choose one of the possible moves (ransom)
+<span class="fc" id="L79">        return foundMoves;        </span>
+    }
+    
+    /**
+     * Tries to find given pattern on board.
+     * The position given by x and y must be part of the pattern
+     * @return an object of the type Find containing 
+     * - the direction the pattern was in,
+     * - the index (position) in the pattern that the x,y position is
+     * - the position given by x and y
+     */
+    public Find findPattern(int x, int y, Player ... pattern) {
+<span class="fc" id="L91">        int index = findHorizontalPattern(x, y, pattern);</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if(index  &gt;= 0) {</span>
+<span class="fc" id="L93">            return new Find(Direction.Horizontal, index, Position.at(x, y));</span>
+        }
+<span class="fc" id="L95">        index = findVerticalPattern(x, y, pattern);</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if(index  &gt;= 0) {</span>
+<span class="fc" id="L97">            return new Find(Direction.Vertical, index, Position.at(x, y));</span>
+        }
+<span class="fc" id="L99">        index = findMainDiagonalPattern(x, y, pattern);</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if(index  &gt;= 0) {</span>
+<span class="fc" id="L101">            return new Find(Direction.MainDiagonal, index, Position.at(x, y));</span>
+        }
+<span class="fc" id="L103">        index = findBiDiagonalPattern(x, y, pattern);</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        if(index  &gt;= 0) {</span>
+<span class="fc" id="L105">            return new Find(Direction.BiDiagonal, index, Position.at(x, y));</span>
+        }
+<span class="fc" id="L107">        return null;</span>
+    }
+    
+    /**
+     * Is the position given by x and y part of a winning 5 in a row?
+     */
+    public boolean isWin(int x, int y) {
+<span class="fc" id="L114">        Player p = game.getBoard()[y][x];</span>
+<span class="fc" id="L115">        return isPatternInAnyDirection(x, y, p, p, p, p, p);</span>
+    }
+    
+    public boolean isPatternInAnyDirection(int x, int y, Player ... pattern) {
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        return findHorizontalPattern(x, y, pattern) &gt;= 0 || </span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">                findVerticalPattern(x, y, pattern) &gt;= 0 || </span>
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">                findMainDiagonalPattern(x, y, pattern) &gt;= 0 ||</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">                findBiDiagonalPattern(x, y, pattern) &gt;= 0;</span>
+    }
+    
+    public int findHorizontalPattern(int x, int y, Player ... pattern) {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        for(int i=0; i&lt;pattern.length; i++) { // x-1, y</span>
+<span class="fc" id="L127">            List&lt;Position&gt; positions = new ArrayList&lt;Position&gt;();</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">            for(int j=0; j&lt;pattern.length; j++) { // x+1, y</span>
+<span class="fc" id="L129">                positions.add(Position.at(x-i+j, y));</span>
+            }
+<span class="fc bfc" id="L131" title="All 4 branches covered.">            if(isInRange(positions) &amp;&amp; matchPattern(positions, pattern)) {</span>
+<span class="fc" id="L132">                return i;</span>
+            }
+        }
+<span class="fc" id="L135">        return -1;</span>
+    }
+    
+    public int findVerticalPattern(int x, int y, Player ... pattern) {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        for(int i=0; i&lt;pattern.length; i++) {</span>
+<span class="fc" id="L140">            List&lt;Position&gt; positions = new ArrayList&lt;Position&gt;();</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">            for(int j=0; j&lt;pattern.length; j++) {</span>
+<span class="fc" id="L142">                positions.add(Position.at(x, y-i+j));</span>
+            }
+<span class="fc bfc" id="L144" title="All 4 branches covered.">            if(isInRange(positions) &amp;&amp; matchPattern(positions, pattern)) {</span>
+<span class="fc" id="L145">                return i;</span>
+            }
+        }
+<span class="fc" id="L148">        return -1;</span>
+    }
+    
+    public int findMainDiagonalPattern(int x, int y, Player ... pattern) {
+        // x+, y+
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        for(int i=0; i&lt;pattern.length; i++) {</span>
+<span class="fc" id="L154">            List&lt;Position&gt; positions = new ArrayList&lt;Position&gt;();</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">            for(int j=0; j&lt;pattern.length; j++) {</span>
+<span class="fc" id="L156">                positions.add(Position.at(x-i+j, y-i+j));</span>
+            }
+<span class="fc bfc" id="L158" title="All 4 branches covered.">            if(isInRange(positions) &amp;&amp; matchPattern(positions, pattern)) {</span>
+<span class="fc" id="L159">                return i;</span>
+            }
+        }
+<span class="fc" id="L162">        return -1;</span>
+    }
+    
+    public int findBiDiagonalPattern(int x, int y, Player ... pattern) {
+        // x+, y-
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        for(int i=0; i&lt;pattern.length; i++) { </span>
+<span class="fc" id="L168">            List&lt;Position&gt; positions = new ArrayList&lt;Position&gt;();</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">            for(int j=0; j&lt;pattern.length; j++) {</span>
+<span class="fc" id="L170">                positions.add(Position.at(x-i+j, y+i-j));</span>
+            }
+<span class="fc bfc" id="L172" title="All 4 branches covered.">            if(isInRange(positions) &amp;&amp; matchPattern(positions, pattern)) {</span>
+<span class="fc" id="L173">                return i;</span>
+            }
+        }
+<span class="fc" id="L176">        return -1;</span>
+    }
+    
+    /**
+     * Are all the given positions in the range of the board?
+     */
+    public boolean isInRange(List&lt;Position&gt; positions) {
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        for(Position p : positions) {</span>
+<span class="fc bfc" id="L184" title="All 8 branches covered.">            if(p.x() &lt; 0 || p.y() &lt; 0 || p.x() &gt;= game.getBoard().length || p.y() &gt;= game.getBoard().length) {</span>
+<span class="fc" id="L185">                return false;</span>
+            }
+<span class="fc" id="L187">        }  </span>
+<span class="fc" id="L188">        return true;</span>
+    }
+    
+    /**
+     * Is the given pattern the same as the given positions on the board?
+     */
+    public boolean matchPattern(List&lt;Position&gt; positions, Player[] pattern) {
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        for(int i=0; i&lt;positions.size(); i++) {</span>
+<span class="fc" id="L196">            Position p = positions.get(i);</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">            if(pattern[i] != game.getBoard()[p.y()][p.x()]) {</span>
+<span class="fc" id="L198">                return false; // Not equal</span>
+            }
+        }   
+<span class="fc" id="L201">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
