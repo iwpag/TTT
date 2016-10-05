@@ -29,6 +29,14 @@ public class SessionControllerTest extends TestCase {
         
     }
     @Test
+    public void testThatYouCanLogOutWithUsername(){
+        SessionController sc= new SessionController(new SessionRepository());
+        Session s= sc.createSession("testName");
+
+        sc.removeSession("testName");
+        assertFalse(s!=null);
+    }
+    @Test
     public void testThatOpponentsListDoesntIncludeyourself(){
         SessionController sc= new SessionController(new SessionRepository());
         Session s= sc.createSession("testName4");

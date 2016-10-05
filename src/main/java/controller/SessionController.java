@@ -26,7 +26,10 @@ public class SessionController {
     }
 
     public void removeSession(String userName) {
-        // todo
+        if(repo.existsSession(userName)){
+            repo.removeSession(userName);
+        }
+        else System.out.println("Session does not exist with username: " + userName);
     }
     
     public Opponents getPossibleOpponents(String myUserName) {
