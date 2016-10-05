@@ -28,4 +28,14 @@ public class SessionControllerTest extends TestCase {
         assertFalse(s2!=null);
         
     }
+    @Test
+    public void testThatOpponentsListDoesntIncludeyourself(){
+        SessionController sc= new SessionController(new SessionRepository());
+        Session s= sc.createSession("testName4");
+        
+        Session s2=sc.createSession("testName5");
+        for(String i : sc.getPossibleOpponents(s.getUserName()).getUserNames()){
+            assertFalse(i.equals(s.getUserName()));
+        }
+    }
 }

@@ -22,7 +22,7 @@ public class SessionController {
             repo.addSession(s);
             return s;
         }
-        return null; // todo
+        return null;
     }
 
     public void removeSession(String userName) {
@@ -30,6 +30,14 @@ public class SessionController {
     }
     
     public Opponents getPossibleOpponents(String myUserName) {
-        throw null; // todo
+        Opponents o=new Opponents();
+        for (String i : repo.getAllUserNames()){
+            if (!i.equals(myUserName)){
+                o.addUserName(i);
+            }
+        }
+        
+        return o;
+        
     }
 }
